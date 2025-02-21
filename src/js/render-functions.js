@@ -8,9 +8,9 @@ const lightbox = new SimpleLightbox('.gallery a', {
         captionDelay: 250 
     });
 
-export function renderImages(images) {
+export async function renderImages(images) {
+  try {
     const gallery = document.querySelector(".gallery");
-    gallery.innerHTML = "";
 
     const galleryMarkup = images.map(image => `
       <a class="gallery-link" href="${image.largeImageURL}">
@@ -36,15 +36,20 @@ export function renderImages(images) {
       </a>
     `).join("");
 
-    gallery.innerHTML = galleryMarkup;
-
-    lightbox.refresh(); 
+    gallery.insertAdjacentHTML("beforeend", galleryMarkup);
+    lightbox.refresh();
+  } catch (error) {
+    console.error("Error rendering images:", error);
+    showError("There was an issue rendering the images.");
+  }
 }
 
-export function clearGallery() {
+export async function clearGallery() {
+  try {
     const gallery = document.querySelector('.gallery');
-    if (gallery) {
-        gallery.innerHTML = '';
+    gallery.innerHTML = '';
+    } catch (error) {
+      console.error("Error clearing gallery:", error);
     }
 }
 
@@ -75,6 +80,17 @@ export function hideLoader() {
     const loader = document.querySelector(".loader");
     if (loader) {
         loader.classList.add("hidden");
+    }
+}
+
+export async function smoothScroll() {  
+    const firstCard = document.querySelector(".gallery a img");
+    if (firstCard) {
+      const cardHeight = firstCard.getBoundingClientRect().height;
+        window.scrollBy({
+            top: cardHeight * 2, 
+            behavior: "smooth" 
+        });
     }
 }
 

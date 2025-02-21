@@ -1,31 +1,72 @@
 import { fetchImages } from './js/pixabay-api.js';
-import { renderImages, clearGallery, showNoResultsMessage, showError } from './js/render-functions.js';
+import { renderImages, clearGallery, showNoResultsMessage, showError, showLoader, hideLoader, smoothScroll } from './js/render-functions.js';
 
 import "./css/loader.css";
 
-document.querySelector(".search-form").addEventListener("submit", event => {
+
+const searchForm = document.querySelector(".search-form");
+const searchInputElement = document.querySelector(".search-input");
+const loadMoreButton = document.querySelector(".load-more");
+const endMessage = document.querySelector(".end-message");
+
+let currentQuery = "";
+let currentPage = 1;
+let totalHits = 0;
+
+searchForm.addEventListener("submit", async event => {
     event.preventDefault();
 
-    const searchInputElement = document.querySelector(".search-input");
     const searchInputValue = searchInputElement.value.trim();
-
     if (searchInputValue === "") {
         showError("Please enter a search query!");
-        searchInputElement.value = "";
         return;
     }
+    if (searchInputValue !== currentQuery) {
+        currentQuery = searchInputValue;
+        currentPage = 1;
+        totalHits = 0;
+        clearGallery();
+        loadMoreButton.classList.add("hidden");
+        endMessage.classList.add("hidden"); 
+    }
 
-    clearGallery();
+    try {
+        const { hits, totalHits: total } = await fetchImages(currentQuery, 1);
+        if (hits.length === 0) {
+            showNoResultsMessage();
+            loadMoreButton.classList.add("hidden");
+        } else {
+            totalHits = total;
+            await renderImages(hits);
+            loadMoreButton.classList.remove("hidden");
+        }
+    } catch (error) {
+        showError("An unexpected error occurred. Please try again later.");
+    } finally {
+        searchInputElement.value = "";
+    }
+});
 
-    fetchImages(searchInputValue)
-        .then(hits => {
-            if (hits.length === 0) {
-                showNoResultsMessage();
+loadMoreButton.addEventListener("click", async () => {
+    try {
+        showLoader();
+        currentPage++;
+        const { hits, totalHits: total } = await fetchImages(currentQuery, currentPage);
+        if (hits.length > 0) {
+            await renderImages(hits);
+            if (hits.length < 40 || currentPage * 40 >= totalHits) {
+                loadMoreButton.classList.add("hidden");
+                endMessage.classList.remove("hidden");
             } else {
-                renderImages(hits);
+                loadMoreButton.classList.remove("hidden");
+                endMessage.classList.add("hidden");
             }
-        })
-        .finally(() => {
-        searchInputElement.value = ""; 
-    })
+
+            smoothScroll();
+        }
+    } catch (error) {
+        showError("An unexpected error occurred. Please try again later.");
+    } finally {
+        hideLoader();
+    }
 });

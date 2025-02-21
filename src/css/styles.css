@@ -9,6 +9,25 @@ body {
 }
 ul {
   list-style-type: none;
+  margin: 0;
+}
+button {
+  border-radius: 8px;
+  border: none;
+  padding: 8px 16px;
+  height: 40px;
+  background-color: #4e75ff;
+
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: #fff;
+
+  cursor: pointer;
+}
+button:hover {
+  background: #6c8cff;
 }
 .search-form {
   margin-top: 36px;
@@ -32,23 +51,7 @@ ul {
   color: #808080;
 }
 .search-btn {
-  border-radius: 8px;
-  border: none;
-  padding: 8px 16px;
   width: 91px;
-  height: 40px;
-  background-color: #4e75ff;
-
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 1.5;
-  letter-spacing: 0.04em;
-  color: #fff;
-
-  cursor: pointer;
-}
-.search-btn:hover {
-  background: #6c8cff;
 }
 
 .gallery {
@@ -108,4 +111,18 @@ ul {
   line-height: 2;
   letter-spacing: 0.04em;
   margin: 0;
+}
+.hidden {
+  display: none;
+}
+.load-more,
+.end-message {
+  margin-top: 32px;
+  margin-bottom: 36px;
+}
+.load-more {
+  width: 125px;
+}
+.end-message {
+  font-weight: 500;
 }
