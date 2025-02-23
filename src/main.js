@@ -32,12 +32,19 @@ searchForm.addEventListener("submit", async event => {
 
     try {
         const { hits, totalHits: total } = await fetchImages(currentQuery, 1);
-        if (hits.length === 0) {
+
+        totalHits = total;
+
+        if (!hits.length) {
             showNoResultsMessage();
-            loadMoreButton.classList.add("hidden");
+            return;
+        }
+
+        await renderImages(hits);
+
+        if (hits.length < 40 || totalHits <= 40) {
+            endMessage.classList.remove("hidden");
         } else {
-            totalHits = total;
-            await renderImages(hits);
             loadMoreButton.classList.remove("hidden");
         }
     } catch (error) {
@@ -51,19 +58,26 @@ loadMoreButton.addEventListener("click", async () => {
     try {
         showLoader();
         currentPage++;
-        const { hits, totalHits: total } = await fetchImages(currentQuery, currentPage);
-        if (hits.length > 0) {
-            await renderImages(hits);
-            if (hits.length < 40 || currentPage * 40 >= totalHits) {
-                loadMoreButton.classList.add("hidden");
-                endMessage.classList.remove("hidden");
-            } else {
-                loadMoreButton.classList.remove("hidden");
-                endMessage.classList.add("hidden");
-            }
-
-            smoothScroll();
+        const { hits } = await fetchImages(currentQuery, currentPage);
+        
+        if (hits.length === 0) {
+            loadMoreButton.classList.add("hidden");
+            endMessage.classList.remove("hidden");
+            return;
         }
+        if (!hits.length) {
+            loadMoreButton.classList.add("hidden");
+            endMessage.classList.remove("hidden");
+            return;
+        }
+        await renderImages(hits);
+       if (hits.length < 40 || currentPage * 40 >= totalHits) {
+            loadMoreButton.classList.add("hidden");
+            endMessage.classList.remove("hidden");
+        }
+            
+            smoothScroll();
+        
     } catch (error) {
         showError("An unexpected error occurred. Please try again later.");
     } finally {
